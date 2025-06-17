@@ -18,7 +18,24 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "San Francisco",
+          "SF Pro Display",
+          "SF Pro Text",
+          "Helvetica Neue",
+          "system-ui",
+          "Arial",
+          "sans-serif",
+        ],
+      },
       colors: {
+        brand: {
+          violet: "#3e0074",
+          orange: "#ff9b16",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
