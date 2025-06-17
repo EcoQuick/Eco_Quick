@@ -184,7 +184,9 @@ const QuoteCalculator = () => {
               className="mt-4 bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white"
               asChild
             >
-              <a href="/auth?quote=true">
+              <a
+                href={`/checkout?pickup=${encodeURIComponent(pickupAddress)}&delivery=${encodeURIComponent(deliveryAddress)}&size=${packageSize}&weight=${weight}&price=${estimatedPrice}`}
+              >
                 Book Now <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
