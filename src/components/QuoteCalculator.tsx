@@ -26,10 +26,14 @@ const QuoteCalculator = () => {
   const [packageSize, setPackageSize] = useState("");
   const [weight, setWeight] = useState("");
   const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
+  const [mapLocations, setMapLocations] = useState<any[]>([]);
 
   const calculatePrice = () => {
     // Simple price calculation logic
     if (!packageSize || !weight) return;
+
+    // Update map locations when calculating price
+    updateMapLocations();
 
     let basePrice = 5; // Base delivery fee
 
@@ -66,6 +70,33 @@ const QuoteCalculator = () => {
   const canCalculate =
     pickupAddress && deliveryAddress && packageSize && weight;
 
+  // Mock geocoding function - in production would use Google Maps Geocoding API
+  const mockGeocode = (address: string, type: "pickup" | "delivery") => {
+    // Mock coordinates for different areas
+    const mockCoordinates = {
+      pickup: { lat: 37.7749, lng: -122.4194 }, // San Francisco
+      delivery: { lat: 37.7849, lng: -122.4094 }, // Slightly different location
+    };
+
+    return {
+      lat: mockCoordinates[type].lat + (Math.random() - 0.5) * 0.02,
+      lng: mockCoordinates[type].lng + (Math.random() - 0.5) * 0.02,
+      label: address.slice(0, 30) + (address.length > 30 ? "..." : ""),
+      type: type,
+    };
+  };
+
+  // Update map locations when addresses change
+  const updateMapLocations = () => {
+    const locations = [];
+    if (pickupAddress) {
+      locations.push(mockGeocode(pickupAddress, "pickup"));
+    }
+    if (deliveryAddress) {
+      locations.push(mockGeocode(deliveryAddress, "delivery"));
+    }
+    setMapLocations(locations);
+  };
   const handleBookNow = () => {
     if (!estimatedPrice) {
       showErrorNotification(
@@ -134,6 +165,20 @@ const QuoteCalculator = () => {
             className="h-12"
           />
         </div>
+
+        {/* Route Map */}
+        {mapLocations.length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700">
+              Delivery Route
+            </Label>
+            <MapComponent
+              locations={mapLocations}
+              showRoute={mapLocations.length === 2}
+              className="h-64"
+            />
+          </div>
+        )}
 
         {/* Package Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
