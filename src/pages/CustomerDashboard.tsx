@@ -150,22 +150,43 @@ const CustomerDashboard = () => {
                   Manage your deliveries and track packages
                 </p>
               </div>
-              <Button
-                className="mt-4 sm:mt-0 bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white"
-                onClick={() => {
-                  // Redirect to homepage quote calculator
-                  window.location.href = "/#quote-calculator";
-                  setTimeout(() => {
-                    showSuccessNotification(
-                      "Ready to Send",
-                      "Fill in your package details below to get started!",
-                    );
-                  }, 500);
-                }}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Request Delivery
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  className="bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white"
+                  onClick={() => {
+                    // Navigate to homepage quote calculator
+                    window.location.href = "/#quote-calculator";
+                    setTimeout(() => {
+                      showSuccessNotification(
+                        "Ready to Send",
+                        "Fill in your package details below to get started!",
+                      );
+                    }, 500);
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Request Delivery
+                </Button>
+
+                {/* Demo Test Button */}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // Pre-fill test delivery for demo
+                    const testParams = new URLSearchParams({
+                      pickup: "123 Market St, San Francisco, CA 94102",
+                      delivery: "456 Valencia St, San Francisco, CA 94103",
+                      size: "medium",
+                      weight: "3.5",
+                      price: "15.99",
+                    });
+                    window.location.href = `/checkout?${testParams.toString()}`;
+                  }}
+                  className="whitespace-nowrap"
+                >
+                  🧪 Test Checkout
+                </Button>
+              </div>
             </div>
           </div>
 
