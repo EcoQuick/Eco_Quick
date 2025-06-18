@@ -480,7 +480,16 @@ const AdminDashboard = () => {
                             <Badge className="bg-yellow-100 text-yellow-800">
                               {stats.pendingOrders} Pending
                             </Badge>
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                showSuccessNotification(
+                                  "Filter Options",
+                                  "Filter panel would open here. Options: Status, Date Range, Customer Type, Amount Range.",
+                                );
+                              }}
+                            >
                               <Filter className="w-4 h-4 mr-2" />
                               Filter
                             </Button>
