@@ -343,7 +343,60 @@ export const MapComponent = ({ locations, onLocationSelect }) => {
 };
 ```
 
-### 3. Google Places API Integration
+### 3. Google Maps Integration
+
+#### A. Driver Navigation Integration
+
+The driver dashboard includes automatic Google Maps navigation when accepting deliveries:
+
+```typescript
+// src/pages/DriverDashboard.tsx - Driver Navigation
+const handleAcceptDelivery = (deliveryId: string) => {
+  const delivery = availableDeliveries.find((d) => d.id === deliveryId);
+
+  if (delivery) {
+    // Create Google Maps URL with navigation
+    const pickupAddress = encodeURIComponent(delivery.pickupAddress);
+    const deliveryAddress = encodeURIComponent(delivery.deliveryAddress);
+    const googleMapsUrl = `https://www.google.com/maps/dir/${pickupAddress}/${deliveryAddress}`;
+
+    // Open navigation in new tab
+    window.open(googleMapsUrl, "_blank");
+
+    // Update delivery status via API
+    updateDeliveryStatus(deliveryId, "accepted");
+  }
+};
+```
+
+#### B. Quote Calculator Map Integration
+
+The quote calculator now includes visual route display:
+
+```typescript
+// src/components/QuoteCalculator.tsx - Route Visualization
+const updateMapLocations = () => {
+  const locations = [];
+  if (pickupAddress) {
+    locations.push(geocodeAddress(pickupAddress, 'pickup'));
+  }
+  if (deliveryAddress) {
+    locations.push(geocodeAddress(deliveryAddress, 'delivery'));
+  }
+  setMapLocations(locations);
+};
+
+// Render map component with route
+{mapLocations.length > 0 && (
+  <MapComponent
+    locations={mapLocations}
+    showRoute={mapLocations.length === 2}
+    className="h-64"
+  />
+)}
+```
+
+### 4. Google Places API Integration
 
 #### A. Address Autocomplete
 
