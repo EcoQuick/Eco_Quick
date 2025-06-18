@@ -3,8 +3,23 @@ import OrderCard from "@/components/OrderCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Package,
   Plus,
@@ -15,13 +30,41 @@ import {
   TrendingUp,
   Star,
   Heart,
+  Trash2,
+  Edit,
 } from "lucide-react";
 import { mockOrders } from "@/lib/mockData";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from "@/components/NotificationSystem";
 
 const CustomerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [savedAddresses, setSavedAddresses] = useState([
+    {
+      id: 1,
+      label: "Home",
+      address: "123 Market St, San Francisco, CA 94102",
+      isDefault: true,
+    },
+    {
+      id: 2,
+      label: "Office",
+      address: "456 Mission St, San Francisco, CA 94103",
+      isDefault: false,
+    },
+  ]);
+  const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    label: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+  });
 
   // Filter orders based on search query
   const filteredOrders = mockOrders.filter(
@@ -44,21 +87,53 @@ const CustomerDashboard = () => {
   const totalSpent = mockOrders.reduce((sum, order) => sum + order.price, 0);
   const averageDeliveryTime = "42 min"; // Mock average
 
-  // Saved addresses (mock data)
-  const savedAddresses = [
-    {
-      id: 1,
-      label: "Home",
-      address: "123 Market St, San Francisco, CA 94102",
-      isDefault: true,
-    },
-    {
-      id: 2,
-      label: "Office",
-      address: "456 Mission St, San Francisco, CA 94103",
-      isDefault: false,
-    },
-  ];
+  // Address management functions
+  const handleAddAddress = () => {
+    if (!newAddress.label || !newAddress.address) {
+      showErrorNotification(
+        "Missing Information",
+        "Please fill in all required fields.",
+      );
+      return;
+    }
+
+    const fullAddress = `${newAddress.address}, ${newAddress.city}, ${newAddress.state} ${newAddress.zipCode}`;
+    const addressToAdd = {
+      id: Date.now(),
+      label: newAddress.label,
+      address: fullAddress,
+      isDefault: savedAddresses.length === 0,
+    };
+
+    setSavedAddresses([...savedAddresses, addressToAdd]);
+    setNewAddress({ label: "", address: "", city: "", state: "", zipCode: "" });
+    setIsAddAddressOpen(false);
+    showSuccessNotification(
+      "Address Added",
+      `${newAddress.label} has been saved to your addresses.`,
+    );
+  };
+
+  const handleDeleteAddress = (addressId: number) => {
+    setSavedAddresses(savedAddresses.filter((addr) => addr.id !== addressId));
+    showSuccessNotification(
+      "Address Deleted",
+      "Address has been removed from your saved addresses.",
+    );
+  };
+
+  const handleSetDefault = (addressId: number) => {
+    setSavedAddresses(
+      savedAddresses.map((addr) => ({
+        ...addr,
+        isDefault: addr.id === addressId,
+      })),
+    );
+    showSuccessNotification(
+      "Default Address Updated",
+      "Your default address has been changed.",
+    );
+  };
 
   return (
     <Layout>
@@ -77,12 +152,19 @@ const CustomerDashboard = () => {
               </div>
               <Button
                 className="mt-4 sm:mt-0 bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white"
-                asChild
+                onClick={() => {
+                  // Redirect to homepage quote calculator
+                  window.location.href = "/#quote-calculator";
+                  setTimeout(() => {
+                    showSuccessNotification(
+                      "Ready to Send",
+                      "Fill in your package details below to get started!",
+                    );
+                  }, 500);
+                }}
               >
-                <Link to="/">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Delivery
-                </Link>
+                <Plus className="w-4 h-4 mr-2" />
+                Request Delivery
               </Button>
             </div>
           </div>
@@ -195,9 +277,17 @@ const CustomerDashboard = () => {
                         </p>
                         <Button
                           className="bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white"
-                          asChild
+                          onClick={() => {
+                            window.location.href = "/#quote-calculator";
+                            setTimeout(() => {
+                              showSuccessNotification(
+                                "Ready to Send",
+                                "Fill in your package details below to get started!",
+                              );
+                            }, 500);
+                          }}
                         >
-                          <Link to="/">Send Your First Package</Link>
+                          Send Your First Package
                         </Button>
                       </CardContent>
                     </Card>
@@ -240,7 +330,7 @@ const CustomerDashboard = () => {
                   {savedAddresses.map((address) => (
                     <div
                       key={address.id}
-                      className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                      className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50"
                     >
                       <MapPin className="w-4 h-4 text-gray-400 mt-1" />
                       <div className="flex-1">
@@ -257,13 +347,141 @@ const CustomerDashboard = () => {
                         <p className="text-sm text-gray-600">
                           {address.address}
                         </p>
+                        <div className="flex items-center space-x-2 mt-2">
+                          {!address.isDefault && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleSetDefault(address.id)}
+                              className="text-xs h-6 px-2"
+                            >
+                              Set Default
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteAddress(address.id)}
+                            className="text-xs h-6 px-2 text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" size="sm" className="w-full">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Address
-                  </Button>
+                  <Dialog
+                    open={isAddAddressOpen}
+                    onOpenChange={setIsAddAddressOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Address
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add New Address</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="label">Address Label *</Label>
+                          <Select
+                            value={newAddress.label}
+                            onValueChange={(value) =>
+                              setNewAddress({ ...newAddress, label: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select address type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Home">🏠 Home</SelectItem>
+                              <SelectItem value="Work">🏢 Work</SelectItem>
+                              <SelectItem value="Gym">💪 Gym</SelectItem>
+                              <SelectItem value="Friend">
+                                👨‍👩‍👧‍👦 Friend's Place
+                              </SelectItem>
+                              <SelectItem value="Other">📍 Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="address">Street Address *</Label>
+                          <Input
+                            id="address"
+                            value={newAddress.address}
+                            onChange={(e) =>
+                              setNewAddress({
+                                ...newAddress,
+                                address: e.target.value,
+                              })
+                            }
+                            placeholder="123 Main Street"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label htmlFor="city">City</Label>
+                            <Input
+                              id="city"
+                              value={newAddress.city}
+                              onChange={(e) =>
+                                setNewAddress({
+                                  ...newAddress,
+                                  city: e.target.value,
+                                })
+                              }
+                              placeholder="San Francisco"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="state">State</Label>
+                            <Input
+                              id="state"
+                              value={newAddress.state}
+                              onChange={(e) =>
+                                setNewAddress({
+                                  ...newAddress,
+                                  state: e.target.value,
+                                })
+                              }
+                              placeholder="CA"
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="zipCode">ZIP Code</Label>
+                          <Input
+                            id="zipCode"
+                            value={newAddress.zipCode}
+                            onChange={(e) =>
+                              setNewAddress({
+                                ...newAddress,
+                                zipCode: e.target.value,
+                              })
+                            }
+                            placeholder="94102"
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2 pt-4">
+                          <Button
+                            variant="outline"
+                            onClick={() => setIsAddAddressOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleAddAddress}
+                            className="bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white"
+                          >
+                            Add Address
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
 
