@@ -32,9 +32,7 @@ const DriverDashboard = () => {
     console.log("Accepting delivery:", deliveryId);
 
     // Find the delivery details from available deliveries
-    const delivery = mockDriverStats.availableDeliveries.find(
-      (d) => d.id === deliveryId,
-    );
+    const delivery = mockAvailableDeliveries.find((d) => d.id === deliveryId);
 
     if (delivery) {
       // In real app, would make API call to accept delivery first
