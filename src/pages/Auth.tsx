@@ -199,10 +199,21 @@ const Auth = () => {
                         <Truck className="w-4 h-4 mr-2" />
                         Demo Driver (Sarah Chen)
                       </Button>
+                      <Button
+                        onClick={() => handleDemoLogin("admin")}
+                        disabled={isLoading}
+                        variant="outline"
+                        className="w-full bg-gradient-to-r from-brand-violet/10 to-brand-orange/10 border-brand-violet/30"
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Demo Admin (Admin User)
+                      </Button>
                     </div>
                     <p className="text-xs text-gray-500 mt-2">
-                      Or use: customer@demo.com / driver@demo.com with password:
-                      demo123
+                      Or use: customer@demo.com / driver@demo.com /
+                      admin@demo.com
+                      <br />
+                      Passwords: demo123 / demo123 / admin123
                     </p>
                   </div>
                 </div>
