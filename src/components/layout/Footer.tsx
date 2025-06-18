@@ -5,7 +5,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
@@ -58,43 +58,90 @@ const Footer = () => {
                   Contact Us
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/about"
+                  className="hover:text-brand-orange transition-colors"
+                >
+                  About Us
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* For Drivers */}
+          {/* For Business */}
           <div>
-            <h3 className="text-white font-semibold mb-4">For Drivers</h3>
+            <h3 className="text-white font-semibold mb-4">For Business</h3>
             <ul className="space-y-2">
+              <li>
+                <Link
+                  to="/business"
+                  className="hover:text-brand-orange transition-colors"
+                >
+                  Business Solutions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/api-docs"
+                  className="hover:text-brand-orange transition-colors"
+                >
+                  API Documentation
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/partners"
+                  className="hover:text-brand-orange transition-colors"
+                >
+                  Partner Program
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/insurance-claims"
+                  className="hover:text-brand-orange transition-colors"
+                >
+                  Insurance Claims
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">Company</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link
+                  to="/blog"
+                  className="hover:text-brand-orange transition-colors"
+                >
+                  Blog & News
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/careers"
+                  className="hover:text-brand-orange transition-colors"
+                >
+                  Careers
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/security"
+                  className="hover:text-brand-orange transition-colors"
+                >
+                  Security & Safety
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/driver"
                   className="hover:text-brand-orange transition-colors"
                 >
                   Become a Driver
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/driver/requirements"
-                  className="hover:text-brand-orange transition-colors"
-                >
-                  Requirements
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/driver/earnings"
-                  className="hover:text-brand-orange transition-colors"
-                >
-                  Driver Earnings
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/driver/support"
-                  className="hover:text-brand-orange transition-colors"
-                >
-                  Driver Support
                 </Link>
               </li>
             </ul>

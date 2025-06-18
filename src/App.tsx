@@ -26,6 +26,14 @@ import ContactUs from "./pages/ContactUs";
 import Pricing from "./pages/Pricing";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
+import AboutUs from "./pages/AboutUs";
+import BusinessSolutions from "./pages/BusinessSolutions";
+import ApiDocs from "./pages/ApiDocs";
+import Careers from "./pages/Careers";
+import Blog from "./pages/Blog";
+import PartnerProgram from "./pages/PartnerProgram";
+import Security from "./pages/Security";
+import InsuranceClaims from "./pages/InsuranceClaims";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +64,16 @@ const App = () => (
           <Route path="/cookies" element={<CookiePolicy />} />
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/contact" element={<ContactUs />} />
+
+          {/* New Pages */}
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/business" element={<BusinessSolutions />} />
+          <Route path="/api-docs" element={<ApiDocs />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/partners" element={<PartnerProgram />} />
+          <Route path="/security" element={<Security />} />
+          <Route path="/insurance-claims" element={<InsuranceClaims />} />
 
           {/* Placeholder routes */}
           <Route path="/pricing" element={<Pricing />} />
