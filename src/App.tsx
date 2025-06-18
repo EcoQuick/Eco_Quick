@@ -23,6 +23,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import CookiePolicy from "./pages/CookiePolicy";
 import HelpCenter from "./pages/HelpCenter";
 import ContactUs from "./pages/ContactUs";
+import Pricing from "./pages/Pricing";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 
@@ -57,15 +58,7 @@ const App = () => (
           <Route path="/contact" element={<ContactUs />} />
 
           {/* Placeholder routes */}
-          <Route
-            path="/pricing"
-            element={
-              <PlaceholderPage
-                title="Pricing"
-                description="Pricing information will be available soon."
-              />
-            }
-          />
+          <Route path="/pricing" element={<Pricing />} />
           <Route
             path="/track"
             element={
