@@ -77,6 +77,7 @@ const Auth = () => {
     // Check if credentials match demo accounts
     const customerDemo = demoAccounts.customer;
     const driverDemo = demoAccounts.driver;
+    const adminDemo = demoAccounts.admin;
 
     setTimeout(() => {
       if (email === customerDemo.email && password === customerDemo.password) {
@@ -86,6 +87,8 @@ const Auth = () => {
         password === driverDemo.password
       ) {
         handleDemoLogin("driver");
+      } else if (email === adminDemo.email && password === adminDemo.password) {
+        handleDemoLogin("admin");
       } else {
         showErrorNotification(
           "Login Failed",
