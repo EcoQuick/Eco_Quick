@@ -796,6 +796,43 @@ VALUES ('admin@ecoquick.com', 'Admin', 'User', 'admin', crypt('admin123', gen_sa
 INSERT INTO users (email, first_name, last_name, user_type, password_hash, is_active)
 VALUES ('admin@demo.com', 'Admin', 'User', 'admin', crypt('admin123', gen_salt('bf')), true);
 
+#### **Admin Panel Functionality**
+
+The admin panel provides comprehensive management features accessible via the `/admin` route.
+
+##### **Authentication & Access**
+- **Demo Credentials**: `admin@demo.com` / `admin123`
+- **Production Setup**: Create secure admin accounts using the SQL above
+- **Access Methods**:
+  - Direct URL: `https://yourdomain.com/admin`
+  - Header dropdown: Admin Panel option when logged in as admin
+  - Auto-redirect: Admin users default to admin dashboard
+
+##### **Quick Actions Panel**
+The admin dashboard includes a Quick Actions sidebar with functional buttons:
+
+1. **Analytics Report**: Switches to revenue analytics tab showing daily/weekly/monthly reports
+2. **User Management**: Opens user management interface (shows notification for now)
+3. **Driver Approvals**: Displays pending driver application count with approval workflow
+4. **Payment Issues**: Shows payment problem notifications and failed transaction review
+5. **Support Tickets**: Displays open ticket count with queue access
+
+##### **Dashboard Features**
+- **Real-time Statistics**: Users, drivers, deliveries, revenue, satisfaction ratings
+- **Revenue Analytics**: Comprehensive financial reporting with growth metrics
+- **Order Management**: View, filter, and manage all delivery orders with action buttons
+- **System Monitoring**: Health status, performance metrics, alert management
+- **Pricing Management**: Dynamic pricing rules with category-specific rates
+- **Coupon System**: Create and manage discount codes with usage tracking
+
+##### **Interactive Elements**
+All buttons in the admin panel now have proper functionality:
+- **View Details**: Opens detailed order information and customer data
+- **Eye Icon**: Provides real-time order tracking and location updates
+- **Filter Options**: Advanced filtering by status, date range, customer type, amount
+- **Export Functions**: Download reports and data exports (CSV, PDF)
+- **Toggle Controls**: Enable/disable pricing rules, coupons, system features
+
 -- Insert default working hours for drivers (Monday to Sunday, 0=Sunday)
 -- This would typically be done when a driver signs up
 INSERT INTO driver_working_hours (driver_id, day_of_week, is_working, start_time, end_time)
