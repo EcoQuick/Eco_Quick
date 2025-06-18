@@ -1123,12 +1123,31 @@ Expired Card: 4000 0000 0000 0069
 
 #### **Admin Panel Testing**
 
+##### **Authentication & Access**
+
+- [ ] Admin login via demo account (`admin@demo.com` / `admin123`)
 - [ ] Admin dashboard access via `/admin` route
+- [ ] Admin badge display in header (⚙️ Admin)
+- [ ] Admin dropdown menu functionality
+
+##### **Quick Actions Functionality**
+
+- [ ] Analytics Report button (switches to revenue tab)
+- [ ] User Management button (shows placeholder notification)
+- [ ] Driver Approvals button (displays pending count)
+- [ ] Payment Issues button (shows error notifications)
+- [ ] Support Tickets button (displays ticket count)
+
+##### **Dashboard Features**
+
 - [ ] System health monitoring display
-- [ ] Revenue analytics and reporting
-- [ ] Pricing rule management (view, edit, toggle)
-- [ ] Coupon creation and management
-- [ ] Order overview and filtering
+- [ ] Revenue analytics and reporting (daily, weekly, monthly)
+- [ ] Pricing rule management (view, edit, toggle, create)
+- [ ] Coupon creation and management (percentage/fixed discounts)
+- [ ] Order overview with functional buttons:
+  - [ ] View Details (order information)
+  - [ ] Eye icon (tracking view)
+  - [ ] Filter functionality
 - [ ] Real-time stats updates
 - [ ] Export functionality testing
 
