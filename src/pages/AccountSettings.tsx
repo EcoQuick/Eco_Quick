@@ -845,7 +845,7 @@ const AccountSettings = () => {
                         : "Delivery Notifications"}
                     </h3>
                     <div className="space-y-3">
-                      {userType === "driver"
+                      {(userType === "driver"
                         ? [
                             {
                               key: "newDeliveryRequests",
@@ -903,41 +903,42 @@ const AccountSettings = () => {
                               description:
                                 "Special offers and discount notifications",
                             },
-                          ].map((item) => (
-                            <div
-                              key={item.key}
-                              className="flex items-center justify-between"
-                            >
-                              <div>
-                                <p className="font-medium text-gray-900">
-                                  {item.label}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  {item.description}
-                                </p>
-                              </div>
-                              <Switch
-                                checked={
-                                  notifications[
-                                    item.key as keyof typeof notifications
-                                  ]
-                                }
-                                onCheckedChange={(checked) => {
-                                  setNotifications({
-                                    ...notifications,
-                                    [item.key]: checked,
-                                  });
-                                  if (userType === "driver" && checked) {
-                                    showDriverNotification(
-                                      "info",
-                                      "Notification Enabled",
-                                      `You will now receive ${item.label.toLowerCase()}`,
-                                    );
-                                  }
-                                }}
-                              />
-                            </div>
-                          ))}
+                          ]
+                      ).map((item) => (
+                        <div
+                          key={item.key}
+                          className="flex items-center justify-between"
+                        >
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {item.label}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {item.description}
+                            </p>
+                          </div>
+                          <Switch
+                            checked={
+                              notifications[
+                                item.key as keyof typeof notifications
+                              ]
+                            }
+                            onCheckedChange={(checked) => {
+                              setNotifications({
+                                ...notifications,
+                                [item.key]: checked,
+                              });
+                              if (userType === "driver" && checked) {
+                                showDriverNotification(
+                                  "info",
+                                  "Notification Enabled",
+                                  `You will now receive ${item.label.toLowerCase()}`,
+                                );
+                              }
+                            }}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
 
