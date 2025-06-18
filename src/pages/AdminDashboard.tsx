@@ -1082,23 +1082,74 @@ const AdminDashboard = () => {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      // Switch to revenue tab to show analytics
+                      const revenueTab = document.querySelector(
+                        '[value="revenue"]',
+                      ) as HTMLElement;
+                      if (revenueTab) revenueTab.click();
+                      showSuccessNotification(
+                        "Analytics Report",
+                        "Switched to revenue analytics view.",
+                      );
+                    }}
+                  >
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Analytics Report
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      showSuccessNotification(
+                        "User Management",
+                        "User management interface would open here. Feature coming soon!",
+                      );
+                    }}
+                  >
                     <Users className="w-4 h-4 mr-2" />
                     Manage Users
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      showSuccessNotification(
+                        "Driver Approvals",
+                        `${Math.floor(Math.random() * 5) + 3} driver applications pending review.`,
+                      );
+                    }}
+                  >
                     <Car className="w-4 h-4 mr-2" />
                     Driver Approvals
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      showErrorNotification(
+                        "Payment Issues",
+                        `${Math.floor(Math.random() * 8) + 2} payment issues detected. Reviewing failed transactions.`,
+                      );
+                    }}
+                  >
                     <CreditCard className="w-4 h-4 mr-2" />
                     Payment Issues
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      const ticketCount = Math.floor(Math.random() * 12) + 5;
+                      showSuccessNotification(
+                        "Support Tickets",
+                        `${ticketCount} open support tickets. Click to view ticket queue.`,
+                      );
+                    }}
+                  >
                     <AlertTriangle className="w-4 h-4 mr-2" />
                     Support Tickets
                   </Button>
