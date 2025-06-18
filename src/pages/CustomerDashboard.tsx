@@ -190,6 +190,24 @@ const CustomerDashboard = () => {
             </div>
           </div>
 
+          {/* Demo Instructions */}
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="font-medium text-blue-900 mb-2">
+              🎯 Demo Account Testing
+            </h3>
+            <p className="text-sm text-blue-700 mb-3">
+              You're using a demo account! Test the full delivery flow:
+            </p>
+            <div className="text-xs text-blue-600 space-y-1">
+              <p>• Use "🧪 Test Checkout" button for instant checkout access</p>
+              <p>• Try the quote calculator on the homepage</p>
+              <p>
+                • Complete the payment flow with test card: 4242 4242 4242 4242
+              </p>
+              <p>• Track deliveries and test all features</p>
+            </div>
+          </div>
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card>
