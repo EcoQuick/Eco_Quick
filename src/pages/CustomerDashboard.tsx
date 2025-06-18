@@ -296,20 +296,40 @@ const CustomerDashboard = () => {
                         <p className="text-gray-600 mb-6">
                           You don't have any packages in transit right now
                         </p>
-                        <Button
-                          className="bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white"
-                          onClick={() => {
-                            window.location.href = "/#quote-calculator";
-                            setTimeout(() => {
-                              showSuccessNotification(
-                                "Ready to Send",
-                                "Fill in your package details below to get started!",
-                              );
-                            }, 500);
-                          }}
-                        >
-                          Send Your First Package
-                        </Button>
+                        <div className="flex flex-col gap-3">
+                          <Button
+                            className="bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white"
+                            onClick={() => {
+                              window.location.href = "/#quote-calculator";
+                              setTimeout(() => {
+                                showSuccessNotification(
+                                  "Ready to Send",
+                                  "Fill in your package details below to get started!",
+                                );
+                              }, 500);
+                            }}
+                          >
+                            Send Your First Package
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              const testParams = new URLSearchParams({
+                                pickup:
+                                  "123 Market St, San Francisco, CA 94102",
+                                delivery:
+                                  "456 Valencia St, San Francisco, CA 94103",
+                                size: "medium",
+                                weight: "3.5",
+                                price: "15.99",
+                              });
+                              window.location.href = `/checkout?${testParams.toString()}`;
+                            }}
+                          >
+                            🧪 Try Demo Checkout
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   )}
