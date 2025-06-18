@@ -94,14 +94,24 @@ const Header = () => {
               Pricing
             </Link>
             <Link
-              to="/driver"
+              to="/business"
               className={`text-sm font-medium transition-colors hover:text-brand-violet ${
-                location.pathname === "/driver"
+                location.pathname === "/business"
                   ? "text-brand-violet"
                   : "text-gray-600"
               }`}
             >
-              Become a Driver
+              For Business
+            </Link>
+            <Link
+              to="/about"
+              className={`text-sm font-medium transition-colors hover:text-brand-violet ${
+                location.pathname === "/about"
+                  ? "text-brand-violet"
+                  : "text-gray-600"
+              }`}
+            >
+              About
             </Link>
           </nav>
 
