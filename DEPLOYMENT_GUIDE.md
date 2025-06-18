@@ -27,7 +27,7 @@
 - **Supabase**: Database and authentication
 - **Stripe**: Payment processing
 - **Mapbox**: Maps and geocoding
-- **Google**: Places API (address autocomplete)
+- **Google**: Places API (address autocomplete) and Maps API for driver navigation
 - **Vercel/Netlify**: Hosting platform
 - **Email Service**: SendGrid/AWS SES for notifications
 
