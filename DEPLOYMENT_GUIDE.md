@@ -789,8 +789,12 @@ INSERT INTO coupons (code, description, discount_type, discount_value, min_order
 ('STUDENT5', 'Student discount', 'fixed', 5, 20, 5, 2000, '2024-01-01', '2024-12-31', 'books,documents');
 
 -- Create admin user (update with actual details)
-INSERT INTO users (email, first_name, last_name, user_type)
-VALUES ('admin@ecoquick.com', 'Admin', 'User', 'admin');
+INSERT INTO users (email, first_name, last_name, user_type, password_hash, is_active)
+VALUES ('admin@ecoquick.com', 'Admin', 'User', 'admin', crypt('admin123', gen_salt('bf')), true);
+
+-- Create demo admin user for development
+INSERT INTO users (email, first_name, last_name, user_type, password_hash, is_active)
+VALUES ('admin@demo.com', 'Admin', 'User', 'admin', crypt('admin123', gen_salt('bf')), true);
 
 -- Insert default working hours for drivers (Monday to Sunday, 0=Sunday)
 -- This would typically be done when a driver signs up
