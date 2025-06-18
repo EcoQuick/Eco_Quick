@@ -526,10 +526,28 @@ const AdminDashboard = () => {
                                   £{order.amount}
                                 </p>
                                 <div className="flex space-x-2 mt-2">
-                                  <Button size="sm" variant="outline">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      showSuccessNotification(
+                                        "Order Tracking",
+                                        `Viewing real-time location for order #${order.id}`,
+                                      );
+                                    }}
+                                  >
                                     <Eye className="w-4 h-4" />
                                   </Button>
-                                  <Button size="sm" variant="outline">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      showSuccessNotification(
+                                        "Order Details",
+                                        `Opening detailed view for order #${order.id} - ${order.customer}`,
+                                      );
+                                    }}
+                                  >
                                     View Details
                                   </Button>
                                 </div>
