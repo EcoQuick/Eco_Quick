@@ -36,6 +36,12 @@ const Auth = () => {
       name: "Sarah Chen",
       type: "driver",
     },
+    admin: {
+      email: "admin@demo.com",
+      password: "admin123",
+      name: "Admin User",
+      type: "admin",
+    },
   };
 
   const handleDemoLogin = (accountType: "customer" | "driver") => {
