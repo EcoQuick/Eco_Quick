@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Package, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import {
+  Package,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Car,
+  DollarSign,
+  Bell,
+  Shield,
+  Zap,
+} from "lucide-react";
 
 export interface Notification {
   id: string;
@@ -8,11 +18,21 @@ export interface Notification {
     | "order_update"
     | "payment_confirmation"
     | "driver_assigned"
-    | "delivery_completed";
+    | "delivery_completed"
+    | "new_delivery_request"
+    | "earnings_update"
+    | "schedule_change"
+    | "system_announcement"
+    | "training_reminder"
+    | "weather_alert"
+    | "certification_expiry"
+    | "payout_processed";
   title: string;
   message: string;
   timestamp: Date;
   orderId?: string;
+  driverId?: string;
+  priority?: "low" | "medium" | "high" | "urgent";
 }
 
 const NotificationSystem = () => {
@@ -167,5 +187,167 @@ export const showInfoNotification = (title: string, message: string) => {
   toast(title, {
     description: message,
     icon: <Package className="w-5 h-5 text-blue-600" />,
+  });
+};
+
+// Driver-specific notification functions
+export const showDriverNotification = (
+  type:
+    | "success"
+    | "error"
+    | "info"
+    | "warning"
+    | "delivery"
+    | "earnings"
+    | "alert",
+  title: string,
+  message: string,
+  action?: { label: string; onClick: () => void },
+) => {
+  const getIconAndColor = () => {
+    switch (type) {
+      case "success":
+        return {
+          icon: <CheckCircle className="w-5 h-5" />,
+          color: "text-green-600",
+        };
+      case "error":
+        return {
+          icon: <AlertCircle className="w-5 h-5" />,
+          color: "text-red-600",
+        };
+      case "warning":
+        return {
+          icon: <AlertCircle className="w-5 h-5" />,
+          color: "text-yellow-600",
+        };
+      case "delivery":
+        return { icon: <Car className="w-5 h-5" />, color: "text-blue-600" };
+      case "earnings":
+        return {
+          icon: <DollarSign className="w-5 h-5" />,
+          color: "text-green-600",
+        };
+      case "alert":
+        return { icon: <Bell className="w-5 h-5" />, color: "text-orange-600" };
+      default:
+        return {
+          icon: <Package className="w-5 h-5" />,
+          color: "text-gray-600",
+        };
+    }
+  };
+
+  const { icon, color } = getIconAndColor();
+
+  if (type === "success") {
+    toast.success(title, {
+      description: message,
+      icon: <div className={color}>{icon}</div>,
+      action: action,
+      duration: 4000,
+    });
+  } else if (type === "error") {
+    toast.error(title, {
+      description: message,
+      icon: <div className={color}>{icon}</div>,
+      action: action,
+      duration: 6000,
+    });
+  } else {
+    toast(title, {
+      description: message,
+      icon: <div className={color}>{icon}</div>,
+      action: action,
+      duration: type === "alert" ? 8000 : 5000,
+    });
+  }
+};
+
+// Specific driver notification types
+export const showNewDeliveryNotification = (
+  orderId: string,
+  pickup: string,
+  payout: string,
+) => {
+  showDriverNotification(
+    "delivery",
+    "🚚 New Delivery Request",
+    `Pickup from ${pickup} • Payout: ${payout}`,
+    {
+      label: "View Details",
+      onClick: () => window.open(`/driver-dashboard`, "_self"),
+    },
+  );
+};
+
+export const showEarningsNotification = (amount: string, period: string) => {
+  showDriverNotification(
+    "earnings",
+    "💰 Earnings Update",
+    `You earned ${amount} ${period}`,
+    {
+      label: "View Earnings",
+      onClick: () => window.open(`/driver-dashboard`, "_self"),
+    },
+  );
+};
+
+export const showPayoutNotification = (amount: string, account: string) => {
+  showDriverNotification(
+    "success",
+    "🏦 Payout Processed",
+    `${amount} has been transferred to ${account}`,
+    {
+      label: "View Details",
+      onClick: () => window.open(`/settings?tab=payment`, "_self"),
+    },
+  );
+};
+
+export const showWeatherAlertNotification = (
+  condition: string,
+  safety: string,
+) => {
+  showDriverNotification(
+    "alert",
+    "⚠️ Weather Alert",
+    `${condition}. ${safety}`,
+    {
+      label: "Safety Tips",
+      onClick: () => window.open(`/help?section=weather`, "_self"),
+    },
+  );
+};
+
+export const showCertificationReminderNotification = (
+  type: string,
+  daysLeft: number,
+) => {
+  showDriverNotification(
+    "warning",
+    "📋 Certification Reminder",
+    `Your ${type} expires in ${daysLeft} days. Please renew to continue driving.`,
+    {
+      label: "Renew Now",
+      onClick: () => window.open(`/driver/certification`, "_self"),
+    },
+  );
+};
+
+export const showScheduleChangeNotification = (
+  change: string,
+  time: string,
+) => {
+  showDriverNotification("info", "📅 Schedule Update", `${change} at ${time}`, {
+    label: "View Schedule",
+    onClick: () => window.open(`/driver-dashboard`, "_self"),
+  });
+};
+
+export const showSystemAnnouncementNotification = (announcement: string) => {
+  showDriverNotification("info", "📢 System Announcement", announcement, {
+    label: "Learn More",
+    onClick: () => window.open(`/help`, "_self"),
   });
 };
