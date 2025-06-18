@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddressAutocomplete from "./AddressAutocomplete";
+import MapComponent from "./MapComponent";
 import { MapPin, Package, Clock, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
