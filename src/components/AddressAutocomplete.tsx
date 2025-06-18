@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Clock, Star } from "lucide-react";
+import { MapPin, Clock, Star, AlertTriangle } from "lucide-react";
+import { validateServiceArea, geocodeUKAddress } from "@/lib/geographicService";
 
 interface Address {
   id: string;
@@ -14,6 +15,7 @@ interface Address {
     lng: number;
   };
   type?: "home" | "work" | "recent" | "prediction";
+  isInServiceArea?: boolean;
 }
 
 interface AddressAutocompleteProps {
@@ -25,17 +27,19 @@ interface AddressAutocompleteProps {
   className?: string;
   recentAddresses?: Address[];
   savedAddresses?: Address[];
+  validateServiceArea?: boolean;
 }
 
 const AddressAutocomplete = ({
   value,
   onChange,
   onAddressSelect,
-  placeholder = "Enter address",
+  placeholder = "Enter UK address",
   icon,
   className,
   recentAddresses = [],
   savedAddresses = [],
+  validateServiceArea: enableValidation = true,
 }: AddressAutocompleteProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [predictions, setPredictions] = useState<Address[]>([]);
@@ -43,83 +47,111 @@ const AddressAutocomplete = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Mock address predictions (in production, would use Google Places API)
+  // Mock UK address predictions for Kingston upon Thames area
   const mockPredictions: Address[] = [
     {
       id: "1",
-      address: "123 Market Street",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94102",
+      address: "123 High Street",
+      city: "Kingston upon Thames",
+      state: "Surrey",
+      zipCode: "KT1 1AA",
       type: "prediction",
-      coordinates: { lat: 37.7749, lng: -122.4194 },
+      coordinates: { lat: 51.4085, lng: -0.3064 },
+      isInServiceArea: true,
     },
     {
       id: "2",
-      address: "456 Valencia Street",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94103",
+      address: "456 London Road",
+      city: "Kingston upon Thames",
+      state: "Surrey",
+      zipCode: "KT2 6QL",
       type: "prediction",
-      coordinates: { lat: 37.7599, lng: -122.4213 },
+      coordinates: { lat: 51.4127, lng: -0.2939 },
+      isInServiceArea: true,
     },
     {
       id: "3",
-      address: "789 Castro Street",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94114",
+      address: "789 Portsmouth Road",
+      city: "Surbiton",
+      state: "Surrey",
+      zipCode: "KT6 4QU",
       type: "prediction",
-      coordinates: { lat: 37.7609, lng: -122.435 },
+      coordinates: { lat: 51.3916, lng: -0.3053 },
+      isInServiceArea: true,
     },
     {
       id: "4",
-      address: "321 Mission Street",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94105",
+      address: "321 Kingston Road",
+      city: "New Malden",
+      state: "Surrey",
+      zipCode: "KT3 3AB",
       type: "prediction",
-      coordinates: { lat: 37.7879, lng: -122.3972 },
+      coordinates: { lat: 51.4006, lng: -0.2578 },
+      isInServiceArea: true,
+    },
+    {
+      id: "5",
+      address: "567 Raynes Park High Street",
+      city: "Raynes Park",
+      state: "London",
+      zipCode: "SW20 9DR",
+      type: "prediction",
+      coordinates: { lat: 51.4088, lng: -0.2292 },
+      isInServiceArea: true,
+    },
+    {
+      id: "6",
+      address: "234 The Broadway",
+      city: "Wimbledon",
+      state: "London",
+      zipCode: "SW19 1SD",
+      type: "prediction",
+      coordinates: { lat: 51.4214, lng: -0.2063 },
+      isInServiceArea: true,
     },
   ];
 
-  // Mock recent addresses
+  // Mock recent UK addresses
   const mockRecentAddresses: Address[] = [
     {
       id: "recent-1",
-      address: "555 Howard Street",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94105",
+      address: "12 Market Place",
+      city: "Kingston upon Thames",
+      state: "Surrey",
+      zipCode: "KT1 1JT",
       type: "recent",
+      isInServiceArea: true,
     },
     {
       id: "recent-2",
-      address: "777 Folsom Street",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94103",
+      address: "78 Coombe Road",
+      city: "Kingston upon Thames",
+      state: "Surrey",
+      zipCode: "KT2 7AF",
       type: "recent",
+      isInServiceArea: true,
     },
   ];
 
-  // Mock saved addresses
+  // Mock saved UK addresses
   const mockSavedAddresses: Address[] = [
     {
       id: "saved-1",
-      address: "123 Home Avenue",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94102",
+      address: "45 Elm Road",
+      city: "Kingston upon Thames",
+      state: "Surrey",
+      zipCode: "KT2 6HH",
       type: "home",
+      isInServiceArea: true,
     },
     {
       id: "saved-2",
-      address: "456 Office Plaza",
-      city: "San Francisco",
-      state: "CA",
-      zipCode: "94104",
+      address: "78 Business Park",
+      city: "New Malden",
+      state: "Surrey",
+      zipCode: "KT3 4EP",
       type: "work",
+      isInServiceArea: true,
     },
   ];
 
@@ -137,23 +169,49 @@ const AddressAutocomplete = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleInputChange = (newValue: string) => {
+  const handleInputChange = async (newValue: string) => {
     onChange(newValue);
 
     if (newValue.length > 2) {
       setIsLoading(true);
-      // Simulate API call delay
-      setTimeout(() => {
+
+      try {
         // Filter mock predictions based on input
-        const filteredPredictions = mockPredictions.filter(
+        let filteredPredictions = mockPredictions.filter(
           (addr) =>
             addr.address.toLowerCase().includes(newValue.toLowerCase()) ||
-            addr.city.toLowerCase().includes(newValue.toLowerCase()),
+            addr.city.toLowerCase().includes(newValue.toLowerCase()) ||
+            addr.zipCode.toLowerCase().includes(newValue.toLowerCase()),
         );
+
+        // If service area validation is enabled, check each address
+        if (enableValidation) {
+          const predictionsWithValidation = await Promise.all(
+            filteredPredictions.map(async (addr) => {
+              if (addr.coordinates) {
+                const validation = validateServiceArea(
+                  `${addr.address}, ${addr.city}, ${addr.zipCode}`,
+                  addr.coordinates,
+                );
+                return {
+                  ...addr,
+                  isInServiceArea: validation.isValid,
+                };
+              }
+              return addr;
+            }),
+          );
+          filteredPredictions = predictionsWithValidation;
+        }
+
         setPredictions(filteredPredictions);
-        setIsLoading(false);
         setIsOpen(true);
-      }, 300);
+      } catch (error) {
+        console.error("Address validation error:", error);
+        setPredictions([]);
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setPredictions([]);
       setIsOpen(newValue.length === 0); // Show saved/recent when empty
@@ -285,6 +343,19 @@ const AddressAutocomplete = ({
                                 {getAddressLabel(address.type)}
                               </span>
                             )}
+                            {enableValidation &&
+                              address.isInServiceArea === false && (
+                                <span className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded flex items-center">
+                                  <AlertTriangle className="w-3 h-3 mr-1" />
+                                  Outside service area
+                                </span>
+                              )}
+                            {enableValidation &&
+                              address.isInServiceArea === true && (
+                                <span className="text-xs px-2 py-1 bg-green-100 text-green-600 rounded">
+                                  ✓ Service available
+                                </span>
+                              )}
                           </div>
                           <p className="text-sm text-gray-600">
                             {address.city}, {address.state} {address.zipCode}

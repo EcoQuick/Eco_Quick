@@ -11,9 +11,20 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddressAutocomplete from "./AddressAutocomplete";
+import ServiceAreaValidator from "./ServiceAreaValidator";
 import MapComponent from "./MapComponent";
-import { MapPin, Package, Clock, ArrowRight } from "lucide-react";
+import {
+  MapPin,
+  Package,
+  Clock,
+  ArrowRight,
+  AlertTriangle,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  validateServiceArea,
+  type LocationValidationResult,
+} from "@/lib/geographicService";
 import {
   showSuccessNotification,
   showErrorNotification,
@@ -27,39 +38,53 @@ const QuoteCalculator = () => {
   const [weight, setWeight] = useState("");
   const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null);
   const [mapLocations, setMapLocations] = useState<any[]>([]);
+  const [pickupValidation, setPickupValidation] =
+    useState<LocationValidationResult | null>(null);
+  const [deliveryValidation, setDeliveryValidation] =
+    useState<LocationValidationResult | null>(null);
 
   const calculatePrice = () => {
+    // Check service area validation first
+    if (!pickupValidation?.isValid || !deliveryValidation?.isValid) {
+      showErrorNotification(
+        "Service Area Error",
+        "Both pickup and delivery addresses must be within our service area.",
+      );
+      return;
+    }
+
     // Simple price calculation logic
     if (!packageSize || !weight) return;
 
     // Update map locations when calculating price
     updateMapLocations();
 
-    let basePrice = 5; // Base delivery fee
+    let basePrice = 6; // Base delivery fee for Kingston area
 
     // Add price based on package size
     switch (packageSize) {
       case "small":
-        basePrice += 3;
+        basePrice += 4;
         break;
       case "medium":
-        basePrice += 8;
+        basePrice += 9;
         break;
       case "large":
-        basePrice += 15;
+        basePrice += 16;
         break;
     }
 
     // Add price based on weight
     const weightNum = parseFloat(weight);
-    if (weightNum > 5) {
-      basePrice += (weightNum - 5) * 2; // $2 per additional pound over 5lbs
+    if (weightNum > 2) {
+      basePrice += (weightNum - 2) * 1.5; // £1.50 per additional kg over 2kg
     }
 
-    // Distance simulation (normally would use Mapbox API)
-    const distanceMultiplier = 1.5; // Simulate average distance cost
-    basePrice *= distanceMultiplier;
+    // Distance-based pricing within service area
+    const avgDistance = 3; // Average 3 miles within Kingston area
+    basePrice += avgDistance * 0.8; // £0.80 per mile
 
+    // Convert to pounds
     setEstimatedPrice(Math.round(basePrice * 100) / 100);
   };
 
@@ -68,7 +93,12 @@ const QuoteCalculator = () => {
   };
 
   const canCalculate =
-    pickupAddress && deliveryAddress && packageSize && weight;
+    pickupAddress &&
+    deliveryAddress &&
+    packageSize &&
+    weight &&
+    pickupValidation?.isValid &&
+    deliveryValidation?.isValid;
 
   // Mock geocoding function - in production would use Google Maps Geocoding API
   const mockGeocode = (address: string, type: "pickup" | "delivery") => {
@@ -143,9 +173,16 @@ const QuoteCalculator = () => {
           <AddressAutocomplete
             value={pickupAddress}
             onChange={setPickupAddress}
-            placeholder="Enter pickup address"
+            placeholder="Enter UK pickup address"
             icon={<MapPin className="h-4 w-4 text-gray-400" />}
             className="h-12"
+            validateServiceArea={true}
+          />
+          <ServiceAreaValidator
+            address={pickupAddress}
+            onValidationChange={setPickupValidation}
+            showDescription={false}
+            className="mt-2"
           />
         </div>
 
@@ -160,9 +197,16 @@ const QuoteCalculator = () => {
           <AddressAutocomplete
             value={deliveryAddress}
             onChange={setDeliveryAddress}
-            placeholder="Enter delivery address"
+            placeholder="Enter UK delivery address"
             icon={<MapPin className="h-4 w-4 text-gray-400" />}
             className="h-12"
+            validateServiceArea={true}
+          />
+          <ServiceAreaValidator
+            address={deliveryAddress}
+            onValidationChange={setDeliveryValidation}
+            showDescription={false}
+            className="mt-2"
           />
         </div>
 
@@ -215,12 +259,12 @@ const QuoteCalculator = () => {
               htmlFor="weight"
               className="text-sm font-medium text-gray-700"
             >
-              Weight (lbs)
+              Weight (kg)
             </Label>
             <Input
               id="weight"
               type="number"
-              placeholder="Enter weight"
+              placeholder="Enter weight in kg"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
               className="h-12"
@@ -239,6 +283,15 @@ const QuoteCalculator = () => {
           Get Instant Quote
         </Button>
 
+        {/* Service Area Info */}
+        {!pickupAddress && !deliveryAddress && (
+          <ServiceAreaValidator
+            address=""
+            showDescription={true}
+            className="mt-4"
+          />
+        )}
+
         {/* Price Display */}
         {estimatedPrice && (
           <div className="bg-gradient-to-r from-brand-violet/10 to-brand-orange/10 rounded-lg p-6 text-center">
@@ -246,7 +299,10 @@ const QuoteCalculator = () => {
               <div>
                 <p className="text-sm text-gray-600">Estimated Price</p>
                 <p className="text-3xl font-bold text-brand-violet">
-                  ${estimatedPrice}
+                  £{estimatedPrice}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Within Kingston upon Thames area
                 </p>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
@@ -262,6 +318,23 @@ const QuoteCalculator = () => {
             </Button>
           </div>
         )}
+
+        {/* Service Area Warning */}
+        {(!pickupValidation?.isValid || !deliveryValidation?.isValid) &&
+          (pickupAddress || deliveryAddress) && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start space-x-3">
+              <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-yellow-900">
+                  Service Area Limitation
+                </h4>
+                <p className="text-sm text-yellow-700">
+                  Both addresses must be within our Kingston upon Thames service
+                  area to proceed with booking.
+                </p>
+              </div>
+            </div>
+          )}
       </CardContent>
     </Card>
   );
