@@ -60,8 +60,8 @@ const App = () => (
             path="/track"
             element={
               <PlaceholderPage
-                title="Track Package"
-                description="Enter your tracking number to track any package."
+                title="Track Any Package"
+                description="Enter your tracking number to track any package. This feature will connect to our tracking system."
               />
             }
           />
