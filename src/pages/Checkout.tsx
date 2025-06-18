@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -13,9 +14,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPin, Package, Clock, User, ArrowRight } from "lucide-react";
+import {
+  MapPin,
+  Package,
+  Clock,
+  User,
+  ArrowRight,
+  Calendar,
+  Zap,
+} from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+
+// Product categories (matching QuoteCalculator)
+const PRODUCT_CATEGORIES = {
+  documents: { label: "Documents & Papers", icon: "📄" },
+  electronics: { label: "Electronics & Gadgets", icon: "📱" },
+  food: { label: "Food & Beverages", icon: "🍔" },
+  clothing: { label: "Clothing & Fashion", icon: "👕" },
+  books: { label: "Books & Media", icon: "📚" },
+  gifts: { label: "Gifts & Flowers", icon: "🎁" },
+  medical: { label: "Medical & Health", icon: "⚕️" },
+  household: { label: "Household Items", icon: "🏠" },
+  other: { label: "Other Items", icon: "📦" },
+};
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -23,19 +45,26 @@ const Checkout = () => {
 
   // Get quote data from URL params (in real app would come from state/context)
   const pickupAddress =
-    searchParams.get("pickup") || "123 Market St, San Francisco, CA";
+    searchParams.get("pickup") ||
+    "123 High Street, Kingston upon Thames, Surrey KT1 1AA";
   const deliveryAddress =
-    searchParams.get("delivery") || "456 Valencia St, San Francisco, CA";
-  const packageSize = searchParams.get("size") || "medium";
-  const weight = searchParams.get("weight") || "3.5";
-  const price = searchParams.get("price") || "15.99";
+    searchParams.get("delivery") ||
+    "456 London Road, Kingston upon Thames, Surrey KT2 6QL";
+  const productCategory = searchParams.get("category") || "documents";
+  const weight = searchParams.get("weight") || "";
+  const price = searchParams.get("price") || "12.99";
+  const driverInstructions = searchParams.get("instructions") || "";
 
-  const [deliveryTime, setDeliveryTime] = useState("");
+  const [schedulingType, setSchedulingType] = useState("instant");
+  const [pickupDate, setPickupDate] = useState("");
+  const [pickupTime, setPickupTime] = useState("");
+  const [dropoffDate, setDropoffDate] = useState("");
+  const [dropoffTime, setDropoffTime] = useState("");
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
     phone: "",
     email: "",
-    instructions: "",
+    instructions: driverInstructions,
   });
 
   const handleProceedToPayment = () => {
@@ -43,17 +72,22 @@ const Checkout = () => {
     navigate(`/payment?orderId=ECO-${Date.now()}&amount=${price}`);
   };
 
-  const getPackageDescription = (size: string) => {
-    switch (size) {
-      case "small":
-        return 'Small (up to 12" x 12" x 6")';
-      case "medium":
-        return 'Medium (up to 18" x 18" x 12")';
-      case "large":
-        return 'Large (up to 24" x 24" x 18")';
-      default:
-        return size;
-    }
+  const getProductDisplay = (category: string) => {
+    const product =
+      PRODUCT_CATEGORIES[category as keyof typeof PRODUCT_CATEGORIES];
+    return product ? `${product.icon} ${product.label}` : `📦 ${category}`;
+  };
+
+  const formatDateTime = (date: string, time: string) => {
+    if (!date || !time) return "";
+    const dateObj = new Date(`${date}T${time}`);
+    return dateObj.toLocaleString("en-GB", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
@@ -78,19 +112,28 @@ const Checkout = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Package Details */}
+                  {/* Product Details */}
                   <div className="space-y-4">
                     <div className="flex items-start space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-brand-violet to-brand-orange rounded-lg flex items-center justify-center">
-                        <Package className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 bg-gradient-to-br from-brand-violet to-brand-orange rounded-lg flex items-center justify-center text-lg">
+                        {PRODUCT_CATEGORIES[
+                          productCategory as keyof typeof PRODUCT_CATEGORIES
+                        ]?.icon || "📦"}
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900">
-                          {getPackageDescription(packageSize)}
+                          {getProductDisplay(productCategory)}
                         </h3>
-                        <p className="text-sm text-gray-600">
-                          Weight: {weight} lbs
-                        </p>
+                        {weight && (
+                          <p className="text-sm text-gray-600">
+                            Weight: {weight} kg
+                          </p>
+                        )}
+                        {driverInstructions && (
+                          <p className="text-sm text-gray-600">
+                            Instructions: {driverInstructions}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -127,29 +170,77 @@ const Checkout = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Base delivery fee</span>
-                      <span>$5.00</span>
+                      <span>£6.00</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Package size fee</span>
-                      <span>$8.00</span>
+                      <span className="text-gray-600">
+                        Product category fee
+                      </span>
+                      <span>
+                        £
+                        {PRODUCT_CATEGORIES[
+                          productCategory as keyof typeof PRODUCT_CATEGORIES
+                        ]?.label.includes("Medical") ||
+                        PRODUCT_CATEGORIES[
+                          productCategory as keyof typeof PRODUCT_CATEGORIES
+                        ]?.label.includes("Electronics")
+                          ? "5.00"
+                          : "3.00"}
+                      </span>
                     </div>
+                    {weight && parseFloat(weight) > 2 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">
+                          Additional weight fee
+                        </span>
+                        <span>
+                          £{((parseFloat(weight) - 2) * 1.5).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Weight fee</span>
-                      <span>$2.99</span>
+                      <span className="text-gray-600">Distance fee</span>
+                      <span>£2.40</span>
                     </div>
+                    {schedulingType !== "instant" && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">
+                          Scheduled delivery
+                        </span>
+                        <span>£1.00</span>
+                      </div>
+                    )}
                     <Separator />
                     <div className="flex justify-between font-bold text-lg">
                       <span>Total</span>
-                      <span className="text-brand-violet">${price}</span>
+                      <span className="text-brand-violet">£{price}</span>
                     </div>
                   </div>
 
-                  {/* Estimated Delivery */}
+                  {/* Delivery Timeline */}
                   <div className="flex items-center space-x-2 p-3 bg-green-50 rounded-lg">
                     <Clock className="w-4 h-4 text-green-600" />
-                    <span className="text-sm text-green-800">
-                      Estimated delivery: 30-60 minutes
-                    </span>
+                    <div className="text-sm text-green-800">
+                      {schedulingType === "instant" ? (
+                        <span>Estimated delivery: 30-60 minutes</span>
+                      ) : pickupDate && pickupTime ? (
+                        <div>
+                          <div>
+                            Pickup: {formatDateTime(pickupDate, pickupTime)}
+                          </div>
+                          {dropoffDate && dropoffTime ? (
+                            <div>
+                              Dropoff:{" "}
+                              {formatDateTime(dropoffDate, dropoffTime)}
+                            </div>
+                          ) : (
+                            <div>Dropoff: ~30-45 min after pickup</div>
+                          )}
+                        </div>
+                      ) : (
+                        <span>Please select pickup time</span>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -157,34 +248,170 @@ const Checkout = () => {
 
             {/* Checkout Form */}
             <div className="lg:order-1 space-y-6">
-              {/* Delivery Time */}
+              {/* Flexible Scheduling */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Delivery Time</CardTitle>
+                  <CardTitle className="flex items-center">
+                    <Clock className="w-5 h-5 mr-2" />
+                    Delivery Scheduling
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <Label htmlFor="delivery-time">
-                      Preferred delivery time
-                    </Label>
-                    <Select
-                      value={deliveryTime}
-                      onValueChange={setDeliveryTime}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select delivery time" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="asap">
-                          As soon as possible
-                        </SelectItem>
-                        <SelectItem value="1hour">Within 1 hour</SelectItem>
-                        <SelectItem value="2hours">Within 2 hours</SelectItem>
-                        <SelectItem value="4hours">Within 4 hours</SelectItem>
-                        <SelectItem value="today">Later today</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Tabs
+                    value={schedulingType}
+                    onValueChange={setSchedulingType}
+                  >
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger
+                        value="instant"
+                        className="flex items-center space-x-2"
+                      >
+                        <Zap className="w-4 h-4" />
+                        <span>Instant Delivery</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="scheduled"
+                        className="flex items-center space-x-2"
+                      >
+                        <Calendar className="w-4 h-4" />
+                        <span>Schedule Delivery</span>
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="instant" className="space-y-4 mt-4">
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Zap className="w-5 h-5 text-green-600" />
+                          <h4 className="font-medium text-green-900">
+                            Instant Delivery
+                          </h4>
+                        </div>
+                        <p className="text-sm text-green-700">
+                          Your package will be picked up within 15-30 minutes
+                          and delivered as quickly as possible.
+                        </p>
+                        <div className="mt-3 flex items-center space-x-4 text-sm text-green-600">
+                          <span>📍 Pickup: Within 30 min</span>
+                          <span>🚚 Delivery: 30-60 min total</span>
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="scheduled" className="space-y-4 mt-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {/* Pickup Scheduling */}
+                        <div className="space-y-3">
+                          <h4 className="font-medium text-gray-900">
+                            Pickup Time
+                          </h4>
+                          <div className="space-y-2">
+                            <Label htmlFor="pickup-date">Date</Label>
+                            <Input
+                              id="pickup-date"
+                              type="date"
+                              value={pickupDate}
+                              onChange={(e) => setPickupDate(e.target.value)}
+                              min={new Date().toISOString().split("T")[0]}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="pickup-time">Time</Label>
+                            <Select
+                              value={pickupTime}
+                              onValueChange={setPickupTime}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select time" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="09:00">09:00 AM</SelectItem>
+                                <SelectItem value="10:00">10:00 AM</SelectItem>
+                                <SelectItem value="11:00">11:00 AM</SelectItem>
+                                <SelectItem value="12:00">12:00 PM</SelectItem>
+                                <SelectItem value="13:00">01:00 PM</SelectItem>
+                                <SelectItem value="14:00">02:00 PM</SelectItem>
+                                <SelectItem value="15:00">03:00 PM</SelectItem>
+                                <SelectItem value="16:00">04:00 PM</SelectItem>
+                                <SelectItem value="17:00">05:00 PM</SelectItem>
+                                <SelectItem value="18:00">06:00 PM</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        {/* Dropoff Scheduling */}
+                        <div className="space-y-3">
+                          <h4 className="font-medium text-gray-900">
+                            Dropoff Time (Optional)
+                          </h4>
+                          <div className="space-y-2">
+                            <Label htmlFor="dropoff-date">Date</Label>
+                            <Input
+                              id="dropoff-date"
+                              type="date"
+                              value={dropoffDate}
+                              onChange={(e) => setDropoffDate(e.target.value)}
+                              min={
+                                pickupDate ||
+                                new Date().toISOString().split("T")[0]
+                              }
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="dropoff-time">Time</Label>
+                            <Select
+                              value={dropoffTime}
+                              onValueChange={setDropoffTime}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="As soon as possible" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="09:00">09:00 AM</SelectItem>
+                                <SelectItem value="10:00">10:00 AM</SelectItem>
+                                <SelectItem value="11:00">11:00 AM</SelectItem>
+                                <SelectItem value="12:00">12:00 PM</SelectItem>
+                                <SelectItem value="13:00">01:00 PM</SelectItem>
+                                <SelectItem value="14:00">02:00 PM</SelectItem>
+                                <SelectItem value="15:00">03:00 PM</SelectItem>
+                                <SelectItem value="16:00">04:00 PM</SelectItem>
+                                <SelectItem value="17:00">05:00 PM</SelectItem>
+                                <SelectItem value="18:00">06:00 PM</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            Leave empty for immediate delivery after pickup
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Scheduled Summary */}
+                      {pickupDate && pickupTime && (
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+                          <h5 className="font-medium text-blue-900 mb-2">
+                            Scheduled Summary
+                          </h5>
+                          <div className="text-sm space-y-1">
+                            <p className="text-blue-700">
+                              📅 Pickup:{" "}
+                              {formatDateTime(pickupDate, pickupTime)}
+                            </p>
+                            {dropoffDate && dropoffTime ? (
+                              <p className="text-blue-700">
+                                🎯 Dropoff:{" "}
+                                {formatDateTime(dropoffDate, dropoffTime)}
+                              </p>
+                            ) : (
+                              <p className="text-blue-700">
+                                🎯 Dropoff: As soon as possible after pickup
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
 
@@ -295,7 +522,9 @@ const Checkout = () => {
                   disabled={
                     !customerInfo.name ||
                     !customerInfo.phone ||
-                    !customerInfo.email
+                    !customerInfo.email ||
+                    (schedulingType === "scheduled" &&
+                      (!pickupDate || !pickupTime))
                   }
                 >
                   Proceed to Payment
