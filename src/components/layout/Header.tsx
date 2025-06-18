@@ -121,7 +121,11 @@ const Header = () => {
             {user ? (
               <div className="flex items-center space-x-3">
                 <Badge variant="outline" className="hidden md:flex">
-                  {user.type === "driver" ? "🚗 Driver" : "📦 Customer"}
+                  {user.type === "driver"
+                    ? "🚗 Driver"
+                    : user.type === "admin"
+                      ? "⚙️ Admin"
+                      : "📦 Customer"}
                 </Badge>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
