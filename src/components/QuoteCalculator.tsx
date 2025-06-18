@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AddressAutocomplete from "./AddressAutocomplete";
 import { MapPin, Package, Clock, ArrowRight } from "lucide-react";
 
 const QuoteCalculator = () => {
@@ -72,17 +73,13 @@ const QuoteCalculator = () => {
           <Label htmlFor="pickup" className="text-sm font-medium text-gray-700">
             Pickup Address
           </Label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="pickup"
-              type="text"
-              placeholder="Enter pickup address"
-              value={pickupAddress}
-              onChange={(e) => setPickupAddress(e.target.value)}
-              className="pl-10 h-12"
-            />
-          </div>
+          <AddressAutocomplete
+            value={pickupAddress}
+            onChange={setPickupAddress}
+            placeholder="Enter pickup address"
+            icon={<MapPin className="h-4 w-4 text-gray-400" />}
+            className="h-12"
+          />
         </div>
 
         {/* Delivery Address */}
@@ -93,17 +90,13 @@ const QuoteCalculator = () => {
           >
             Delivery Address
           </Label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-            <Input
-              id="delivery"
-              type="text"
-              placeholder="Enter delivery address"
-              value={deliveryAddress}
-              onChange={(e) => setDeliveryAddress(e.target.value)}
-              className="pl-10 h-12"
-            />
-          </div>
+          <AddressAutocomplete
+            value={deliveryAddress}
+            onChange={setDeliveryAddress}
+            placeholder="Enter delivery address"
+            icon={<MapPin className="h-4 w-4 text-gray-400" />}
+            className="h-12"
+          />
         </div>
 
         {/* Package Details */}

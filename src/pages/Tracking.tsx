@@ -1,4 +1,5 @@
 import Layout from "@/components/layout/Layout";
+import RatingSystem from "@/components/RatingSystem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -357,9 +358,16 @@ const Tracking = () => {
                   <Link to="/dashboard">Back to Dashboard</Link>
                 </Button>
                 {order.status === "delivered" && (
-                  <Button className="flex-1 bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white">
-                    Rate Experience
-                  </Button>
+                  <RatingSystem
+                    orderId={order.id}
+                    driverName={order.driver?.name}
+                    driverPhoto={order.driver?.photo}
+                    trigger={
+                      <Button className="flex-1 bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white">
+                        Rate Experience
+                      </Button>
+                    }
+                  />
                 )}
               </div>
             </div>
