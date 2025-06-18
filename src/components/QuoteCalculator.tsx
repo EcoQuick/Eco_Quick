@@ -12,8 +12,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AddressAutocomplete from "./AddressAutocomplete";
 import { MapPin, Package, Clock, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  showSuccessNotification,
+  showErrorNotification,
+} from "./NotificationSystem";
 
 const QuoteCalculator = () => {
+  const navigate = useNavigate();
   const [pickupAddress, setPickupAddress] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [packageSize, setPackageSize] = useState("");
@@ -58,6 +64,35 @@ const QuoteCalculator = () => {
 
   const canCalculate =
     pickupAddress && deliveryAddress && packageSize && weight;
+
+  const handleBookNow = () => {
+    if (!estimatedPrice) {
+      showErrorNotification(
+        "Get Quote First",
+        "Please calculate your quote before booking.",
+      );
+      return;
+    }
+
+    // Check if user is logged in
+    const demoUser = localStorage.getItem("demoUser");
+    if (!demoUser) {
+      showErrorNotification(
+        "Login Required",
+        "Please sign in to book a delivery.",
+      );
+      navigate("/auth");
+      return;
+    }
+
+    // Navigate to checkout with parameters
+    const checkoutUrl = `/checkout?pickup=${encodeURIComponent(pickupAddress)}&delivery=${encodeURIComponent(deliveryAddress)}&size=${packageSize}&weight=${weight}&price=${estimatedPrice}`;
+    navigate(checkoutUrl);
+    showSuccessNotification(
+      "Redirecting to Checkout",
+      "Complete your booking details...",
+    );
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto bg-white shadow-2xl border-0">
@@ -174,14 +209,10 @@ const QuoteCalculator = () => {
               </div>
             </div>
             <Button
+              onClick={handleBookNow}
               className="mt-4 bg-gradient-to-r from-brand-violet to-brand-orange hover:from-brand-violet/90 hover:to-brand-orange/90 text-white"
-              asChild
             >
-              <a
-                href={`/checkout?pickup=${encodeURIComponent(pickupAddress)}&delivery=${encodeURIComponent(deliveryAddress)}&size=${packageSize}&weight=${weight}&price=${estimatedPrice}`}
-              >
-                Book Now <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              Book Now <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         )}
