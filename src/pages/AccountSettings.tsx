@@ -1041,7 +1041,7 @@ const AccountSettings = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
-                    {userType === "driver"
+                    {(userType === "driver"
                       ? [
                           {
                             key: "shareLocation",
@@ -1100,40 +1100,39 @@ const AccountSettings = () => {
                             description:
                               "Allow sharing of anonymized usage data with partners",
                           },
-                        ].map((item) => (
-                          <div
-                            key={item.key}
-                            className="flex items-center justify-between"
-                          >
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <p className="font-medium text-gray-900">
-                                  {item.label}
-                                </p>
-                                {item.required && (
-                                  <Badge variant="outline" className="text-xs">
-                                    Required
-                                  </Badge>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-600">
-                                {item.description}
-                              </p>
-                            </div>
-                            <Switch
-                              checked={
-                                privacy[item.key as keyof typeof privacy]
-                              }
-                              disabled={item.required}
-                              onCheckedChange={(checked) =>
-                                setPrivacy({
-                                  ...privacy,
-                                  [item.key]: checked,
-                                })
-                              }
-                            />
+                        ]
+                    ).map((item) => (
+                      <div
+                        key={item.key}
+                        className="flex items-center justify-between"
+                      >
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <p className="font-medium text-gray-900">
+                              {item.label}
+                            </p>
+                            {item.required && (
+                              <Badge variant="outline" className="text-xs">
+                                Required
+                              </Badge>
+                            )}
                           </div>
-                        ))}
+                          <p className="text-sm text-gray-600">
+                            {item.description}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={privacy[item.key as keyof typeof privacy]}
+                          disabled={item.required}
+                          onCheckedChange={(checked) =>
+                            setPrivacy({
+                              ...privacy,
+                              [item.key]: checked,
+                            })
+                          }
+                        />
+                      </div>
+                    ))}
                   </div>
 
                   <Separator />
