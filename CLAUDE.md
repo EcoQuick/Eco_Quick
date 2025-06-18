@@ -111,7 +111,7 @@ The styling system supports dark mode through CSS variables and media queries.
 ### 📦 Advanced Product Management
 
 - **Product Categories**: 9 distinct categories with detailed descriptions and icons
-  - Documents & Papers (���)
+  - Documents & Papers (📄)
   - Electronics & Gadgets (📱)
   - Food & Beverages (🍔)
   - Clothing & Fashion (👕)
@@ -322,3 +322,74 @@ const nextSteps = getNextSteps(status);
 - **Safety Protocols**: 45-minute comprehensive safety training
 - **Vehicle Inspection**: Green vehicle standards compliance
 - **Sustainability Commitment**: Pledge to eco-friendly practices
+
+## 📱 Driver-Specific Features
+
+### Driver Settings & Profile Management
+
+- **User Type Detection**: Automatic detection of driver vs customer accounts
+- **Driver Information Tab**: Vehicle details, working hours, earnings summary
+- **Enhanced Personal Info**: Additional fields for driver verification
+- **Banking Integration**: Bank account details for payouts instead of payment cards
+- **Working Hours Management**: Configurable schedule for each day of the week
+
+### Driver Notification System
+
+- **Specialized Notifications**: Driver-specific notification types and priorities
+- **Real-time Alerts**: New delivery requests, earnings updates, schedule changes
+- **Safety Notifications**: Weather alerts and safety reminders
+- **System Announcements**: Platform updates and important notices
+- **Certification Reminders**: Training renewal and compliance notifications
+- **Payout Notifications**: Earnings transfers and payment confirmations
+
+### Notification Categories for Drivers
+
+```typescript
+// Driver notification types
+{
+  newDeliveryRequests: true,      // New delivery opportunities
+  earningsUpdates: true,          // Payment and earnings notifications
+  scheduleChanges: true,          // Delivery schedule modifications
+  systemAnnouncements: true,      // Platform updates
+  trainingReminders: true,        // Certification renewals
+  weatherAlerts: true,           // Safety-related weather warnings
+  // Communication channels
+  emailNotifications: true,
+  smsNotifications: true,
+  pushNotifications: true,
+  inAppNotifications: true
+}
+```
+
+### Driver Privacy & Security
+
+- **Required Location Sharing**: Mandatory for delivery tracking and customer updates
+- **Earnings Data Control**: Option to share/restrict earnings analytics
+- **Profile Visibility**: Control customer access to driver information
+- **Rating Transparency**: Manage visibility of ratings and reviews
+
+## 🗄️ Enhanced Database Schema
+
+### Driver-Specific Tables
+
+- **`driver_notifications`**: Comprehensive notification management for drivers
+- **`notification_preferences`**: User-specific notification settings by type
+- **`driver_working_hours`**: Configurable working schedule per driver
+- **`driver_profiles`**: Extended driver information and certification status
+
+### Notification Management Functions
+
+```sql
+-- Send targeted driver notifications
+SELECT send_driver_notification(
+  driver_id, 'new_delivery_request',
+  'New Delivery Available', 'Pickup from Kingston High Street',
+  'high', order_id, metadata, 2  -- expires in 2 hours
+);
+
+-- Mark notifications as read
+SELECT mark_notifications_read(driver_id, notification_ids);
+
+-- Clean up expired notifications
+SELECT cleanup_expired_notifications();
+```
