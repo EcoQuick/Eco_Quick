@@ -44,7 +44,7 @@ const Auth = () => {
     },
   };
 
-  const handleDemoLogin = (accountType: "customer" | "driver") => {
+  const handleDemoLogin = (accountType: "customer" | "driver" | "admin") => {
     const account = demoAccounts[accountType];
     setIsLoading(true);
 
@@ -61,8 +61,10 @@ const Auth = () => {
       // Redirect to appropriate dashboard
       if (accountType === "customer") {
         navigate("/customer-dashboard");
-      } else {
+      } else if (accountType === "driver") {
         navigate("/driver-dashboard");
+      } else if (accountType === "admin") {
+        navigate("/admin");
       }
 
       setIsLoading(false);
