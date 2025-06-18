@@ -18,6 +18,11 @@ import Checkout from "./pages/Checkout";
 import Payment from "./pages/Payment";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Tracking from "./pages/Tracking";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import CookiePolicy from "./pages/CookiePolicy";
+import HelpCenter from "./pages/HelpCenter";
+import ContactUs from "./pages/ContactUs";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +50,11 @@ const App = () => (
           <Route path="/payment" element={<Payment />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/tracking/:orderId" element={<Tracking />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/cookies" element={<CookiePolicy />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/contact" element={<ContactUs />} />
 
           {/* Placeholder routes */}
           <Route
@@ -70,19 +80,38 @@ const App = () => (
             element={
               <PlaceholderPage
                 title="Become a Driver"
-                description="Join our driver network and start earning."
+                description="Join our driver network and start earning. Click the button below to get started!"
               />
             }
           />
           <Route
-            path="/support"
+            path="/driver/requirements"
             element={
               <PlaceholderPage
-                title="Support"
-                description="Get help with your delivery questions."
+                title="Driver Requirements"
+                description="Learn about the requirements to become an EcoQuick driver."
               />
             }
           />
+          <Route
+            path="/driver/earnings"
+            element={
+              <PlaceholderPage
+                title="Driver Earnings"
+                description="Discover how much you can earn as an EcoQuick driver."
+              />
+            }
+          />
+          <Route
+            path="/driver/support"
+            element={
+              <PlaceholderPage
+                title="Driver Support"
+                description="Get help and support specifically for drivers."
+              />
+            }
+          />
+          <Route path="/support" element={<ContactUs />} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
