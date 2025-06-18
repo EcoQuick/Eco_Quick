@@ -120,7 +120,7 @@ const Index = () => {
             </div>
 
             {/* Right Column - Quote Calculator */}
-            <div className="relative">
+            <div className="relative" id="quote-calculator">
               <QuoteCalculator />
             </div>
           </div>
