@@ -5,7 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Package, Mail, Lock, User, LogIn, Truck } from "lucide-react";
+import {
+  Package,
+  Mail,
+  Lock,
+  User,
+  LogIn,
+  Truck,
+  Settings,
+} from "lucide-react";
 import { useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import {
