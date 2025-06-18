@@ -14,6 +14,7 @@ import AccountSettings from "./pages/AccountSettings";
 import AdminDashboard from "./pages/AdminDashboard";
 import ForgotPassword from "./pages/ForgotPassword";
 import DriverSignup from "./pages/DriverSignup";
+import DriverCertification from "./pages/DriverCertification";
 import Checkout from "./pages/Checkout";
 import Payment from "./pages/Payment";
 import OrderConfirmation from "./pages/OrderConfirmation";
@@ -49,6 +50,10 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/driver/signup" element={<DriverSignup />} />
+          <Route
+            path="/driver/certification"
+            element={<DriverCertification />}
+          />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/customer-dashboard" element={<CustomerDashboard />} />
           <Route path="/driver-dashboard" element={<DriverDashboard />} />

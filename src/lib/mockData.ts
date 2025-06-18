@@ -44,23 +44,23 @@ export interface DriverStats {
 export const mockOrders: DeliveryOrder[] = [
   {
     id: "ECO-2024-001",
-    pickupAddress: "123 Market St, San Francisco, CA 94102",
-    deliveryAddress: "456 Valencia St, San Francisco, CA 94103",
+    pickupAddress: "123 High Street, Kingston upon Thames, Surrey KT1 1AA",
+    deliveryAddress: "456 London Road, Kingston upon Thames, Surrey KT2 6QL",
     packageSize: "medium",
-    weight: 3.5,
-    price: 15.99,
+    weight: 2.5,
+    price: 12.99,
     status: "in_transit",
     createdAt: "2024-01-15T10:30:00Z",
     estimatedDelivery: "2024-01-15T11:45:00Z",
     driver: {
       id: "driver-123",
-      name: "Sarah Chen",
+      name: "Sarah Thompson",
       rating: 4.9,
       photo: "/api/placeholder/40/40",
-      phone: "+1 (415) 555-0123",
+      phone: "+44 20 8974 5123",
       location: {
-        lat: 37.7849,
-        lng: -122.4094,
+        lat: 51.4085,
+        lng: -0.3064,
       },
     },
     timeline: [
@@ -73,7 +73,7 @@ export const mockOrders: DeliveryOrder[] = [
       {
         status: "Driver Assigned",
         timestamp: "2024-01-15T10:35:00Z",
-        description: "Sarah Chen will handle your delivery",
+        description: "Sarah Thompson will handle your delivery",
         completed: true,
       },
       {
@@ -98,8 +98,8 @@ export const mockOrders: DeliveryOrder[] = [
   },
   {
     id: "ECO-2024-002",
-    pickupAddress: "789 Mission St, San Francisco, CA 94103",
-    deliveryAddress: "321 Castro St, San Francisco, CA 94114",
+    pickupAddress: "789 Portsmouth Road, Surbiton, Surrey KT6 4QU",
+    deliveryAddress: "321 Kingston Road, New Malden, Surrey KT3 3AB",
     packageSize: "small",
     weight: 1.2,
     price: 8.99,
@@ -116,7 +116,7 @@ export const mockOrders: DeliveryOrder[] = [
       {
         status: "Driver Assigned",
         timestamp: "2024-01-14T14:25:00Z",
-        description: "Mike Rodriguez will handle your delivery",
+        description: "James Wilson will handle your delivery",
         completed: true,
       },
       {
@@ -152,20 +152,29 @@ export const mockDriverStats: DriverStats = {
 export const mockAvailableDeliveries = [
   {
     id: "pending-001",
-    pickupAddress: "555 Market St, San Francisco, CA",
-    deliveryAddress: "777 Howard St, San Francisco, CA",
-    distance: "2.3 miles",
-    payout: "$12.50",
+    pickupAddress: "55 Market Place, Kingston upon Thames, Surrey KT1 1JT",
+    deliveryAddress: "77 Coombe Road, Kingston upon Thames, Surrey KT2 7AF",
+    distance: "2.1 miles",
+    payout: "£11.50",
     packageSize: "medium",
-    estimatedTime: "25 min",
+    estimatedTime: "22 min",
   },
   {
     id: "pending-002",
-    pickupAddress: "123 Folsom St, San Francisco, CA",
-    deliveryAddress: "456 Bryant St, San Francisco, CA",
-    distance: "1.8 miles",
-    payout: "$9.75",
+    pickupAddress: "12 The Broadway, Wimbledon, London SW19 1SD",
+    deliveryAddress: "45 Raynes Park High Street, London SW20 9DR",
+    distance: "1.6 miles",
+    payout: "£9.25",
     packageSize: "small",
-    estimatedTime: "18 min",
+    estimatedTime: "16 min",
+  },
+  {
+    id: "pending-003",
+    pickupAddress: "34 Church Street, Kingston upon Thames, Surrey KT1 1RJ",
+    deliveryAddress: "67 Victoria Drive, Surbiton, Surrey KT6 5NY",
+    distance: "2.8 miles",
+    payout: "£13.75",
+    packageSize: "large",
+    estimatedTime: "28 min",
   },
 ];

@@ -25,9 +25,18 @@ import {
   CheckCircle,
   ArrowLeft,
   Calendar,
+  Leaf,
+  Shield,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  validateServiceArea,
+  validateDriverLocation,
+  type LocationValidationResult,
+} from "@/lib/geographicService";
+import { validateGreenVehicle } from "@/lib/backgroundCheck";
+import ServiceAreaValidator from "@/components/ServiceAreaValidator";
 import {
   showSuccessNotification,
   showErrorNotification,
@@ -37,6 +46,13 @@ const DriverSignup = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [locationValidation, setLocationValidation] =
+    useState<LocationValidationResult | null>(null);
+  const [vehicleValidation, setVehicleValidation] = useState<{
+    isValid: boolean;
+    message: string;
+    recommendations?: string[];
+  } | null>(null);
 
   const [personalInfo, setPersonalInfo] = useState({
     firstName: "",
@@ -76,17 +92,28 @@ const DriverSignup = () => {
       !personalInfo.lastName ||
       !personalInfo.email ||
       !personalInfo.phone ||
-      !personalInfo.password
+      !personalInfo.password ||
+      !personalInfo.address ||
+      !personalInfo.city
     ) {
       showErrorNotification(
         "Missing Information",
-        "Please fill in all required fields.",
+        "Please fill in all required fields including your full address.",
       );
       return;
     }
 
     if (personalInfo.password !== personalInfo.confirmPassword) {
       showErrorNotification("Password Mismatch", "Passwords do not match.");
+      return;
+    }
+
+    // Validate service area
+    if (!locationValidation?.isValid) {
+      showErrorNotification(
+        "Service Area",
+        "Your address must be within our Kingston upon Thames service area to become a driver.",
+      );
       return;
     }
 
@@ -105,6 +132,19 @@ const DriverSignup = () => {
       showErrorNotification(
         "Missing Information",
         "Please fill in all required vehicle details.",
+      );
+      return;
+    }
+
+    // Validate green vehicle requirements
+    const validation = validateGreenVehicle(vehicleInfo);
+    setVehicleValidation(validation);
+
+    if (!validation.isValid) {
+      showErrorNotification(
+        "Vehicle Requirements",
+        validation.message +
+          " Please review our green transportation requirements.",
       );
       return;
     }
@@ -134,7 +174,7 @@ const DriverSignup = () => {
       setIsLoading(false);
       showSuccessNotification(
         "Application Submitted!",
-        "We'll review your application and contact you within 24-48 hours.",
+        "Now starting your certification process...",
       );
 
       // Store demo driver data
@@ -142,14 +182,17 @@ const DriverSignup = () => {
         ...personalInfo,
         ...vehicleInfo,
         type: "driver",
-        status: "pending_approval",
+        status: "pending_certification",
+        locationValidation,
+        vehicleValidation,
       };
       localStorage.setItem(
         "pendingDriverApplication",
         JSON.stringify(driverData),
       );
 
-      navigate("/auth?message=driver-application-submitted");
+      // Navigate to certification page instead of auth
+      navigate("/driver/certification");
     }, 2000);
   };
 
@@ -326,10 +369,16 @@ const DriverSignup = () => {
                   setPersonalInfo({ ...personalInfo, address: e.target.value })
                 }
                 className="pl-10"
-                placeholder="123 Main Street"
+                placeholder="123 High Street, Kingston upon Thames"
                 required
               />
             </div>
+            <ServiceAreaValidator
+              address={`${personalInfo.address}, ${personalInfo.city}, ${personalInfo.state || ""}`}
+              onValidationChange={setLocationValidation}
+              showDescription={false}
+              className="mt-2"
+            />
           </div>
 
           <div className="space-y-2">
@@ -340,21 +389,20 @@ const DriverSignup = () => {
               onChange={(e) =>
                 setPersonalInfo({ ...personalInfo, city: e.target.value })
               }
-              placeholder="San Francisco"
+              placeholder="Kingston upon Thames"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="state">State *</Label>
+            <Label htmlFor="state">County/Region</Label>
             <Input
               id="state"
               value={personalInfo.state}
               onChange={(e) =>
                 setPersonalInfo({ ...personalInfo, state: e.target.value })
               }
-              placeholder="CA"
-              required
+              placeholder="Surrey"
             />
           </div>
         </div>
@@ -411,20 +459,56 @@ const DriverSignup = () => {
             <Label htmlFor="vehicleType">Vehicle Type *</Label>
             <Select
               value={vehicleInfo.vehicleType}
-              onValueChange={(value) =>
-                setVehicleInfo({ ...vehicleInfo, vehicleType: value })
-              }
+              onValueChange={(value) => {
+                const updatedVehicleInfo = {
+                  ...vehicleInfo,
+                  vehicleType: value,
+                };
+                setVehicleInfo(updatedVehicleInfo);
+                // Validate green vehicle requirements when type changes
+                const validation = validateGreenVehicle(updatedVehicleInfo);
+                setVehicleValidation(validation);
+              }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select vehicle type" />
+                <SelectValue placeholder="Select green vehicle type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="car">Car</SelectItem>
-                <SelectItem value="motorcycle">Motorcycle</SelectItem>
-                <SelectItem value="bicycle">Bicycle</SelectItem>
-                <SelectItem value="scooter">Scooter</SelectItem>
+                <SelectItem value="bicycle">🚴‍♂️ Bicycle (Preferred)</SelectItem>
+                <SelectItem value="electric_scooter">
+                  🛴 Electric Scooter (Preferred)
+                </SelectItem>
+                <SelectItem value="electric_car">
+                  🔋 Electric Car (Preferred)
+                </SelectItem>
+                <SelectItem value="hybrid">⚡ Hybrid Car</SelectItem>
+                <SelectItem value="electric_motorcycle">
+                  🏍️ Electric Motorcycle
+                </SelectItem>
+                <SelectItem value="car">🚗 Conventional Car (2015+)</SelectItem>
+                <SelectItem value="motorcycle">
+                  🏍️ Motorcycle (2015+)
+                </SelectItem>
               </SelectContent>
             </Select>
+            {vehicleValidation && (
+              <div
+                className={`mt-2 p-3 rounded border text-sm ${
+                  vehicleValidation.isValid
+                    ? "bg-green-50 border-green-200 text-green-700"
+                    : "bg-red-50 border-red-200 text-red-700"
+                }`}
+              >
+                <p className="font-medium mb-1">{vehicleValidation.message}</p>
+                {vehicleValidation.recommendations && (
+                  <ul className="text-xs space-y-1">
+                    {vehicleValidation.recommendations.map((rec, index) => (
+                      <li key={index}>• {rec}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -555,7 +639,10 @@ const DriverSignup = () => {
 
         {/* Requirements */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-gray-900">Driver Requirements</h3>
+          <h3 className="font-semibold text-gray-900 flex items-center space-x-2">
+            <Shield className="w-5 h-5 text-brand-violet" />
+            <span>Driver Requirements</span>
+          </h3>
           <div className="space-y-3">
             <div className="flex items-center space-x-3">
               <CheckCircle className="w-5 h-5 text-green-500" />
@@ -566,17 +653,61 @@ const DriverSignup = () => {
             <div className="flex items-center space-x-3">
               <CheckCircle className="w-5 h-5 text-green-500" />
               <span className="text-sm text-gray-700">
-                Valid driver's license
+                Valid UK driver's license (for motor vehicles)
               </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle className="w-5 h-5 text-green-500" />
-              <span className="text-sm text-gray-700">Vehicle insurance</span>
+              <span className="text-sm text-gray-700">
+                Vehicle insurance (where required)
+              </span>
             </div>
             <div className="flex items-center space-x-3">
               <CheckCircle className="w-5 h-5 text-green-500" />
               <span className="text-sm text-gray-700">
                 Clean driving record
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span className="text-sm text-gray-700">
+                Residence within Kingston upon Thames service area
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Green Transportation Requirements */}
+        <div className="space-y-4">
+          <h3 className="font-semibold text-gray-900 flex items-center space-x-2">
+            <Leaf className="w-5 h-5 text-green-600" />
+            <span>Green Transportation Standards</span>
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span className="text-sm text-gray-700">
+                Eco-friendly transportation methods only
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span className="text-sm text-gray-700">
+                Green Rider Certification completion
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span className="text-sm text-gray-700">
+                Environmental impact training
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span className="text-sm text-gray-700">
+                Vehicle meets sustainability standards
               </span>
             </div>
           </div>
