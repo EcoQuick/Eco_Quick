@@ -64,6 +64,35 @@ const Index = () => {
                 </Button>
               </div>
 
+              {/* Demo Access */}
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 className="font-medium text-blue-900 mb-2">
+                  🚀 Try the Demo
+                </h3>
+                <p className="text-sm text-blue-700 mb-3">
+                  Experience EcoQuick with our demo accounts - no signup
+                  required!
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-blue-700 border-blue-300"
+                    asChild
+                  >
+                    <Link to="/auth">📦 Customer Demo</Link>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-blue-700 border-blue-300"
+                    asChild
+                  >
+                    <Link to="/auth">🚗 Driver Demo</Link>
+                  </Button>
+                </div>
+              </div>
+
               {/* Stats */}
               <div className="flex items-center justify-center lg:justify-start space-x-8 mt-12 text-sm">
                 <div className="text-center">
