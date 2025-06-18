@@ -26,7 +26,39 @@ const DriverDashboard = () => {
 
   const handleAcceptDelivery = (deliveryId: string) => {
     console.log("Accepting delivery:", deliveryId);
-    // In real app, would make API call to accept delivery
+
+    // Find the delivery details from available deliveries
+    const delivery = mockDriverStats.availableDeliveries.find(
+      (d) => d.id === deliveryId,
+    );
+
+    if (delivery) {
+      // In real app, would make API call to accept delivery first
+      // Then redirect to Google Maps with pre-filled locations
+
+      const pickupAddress = encodeURIComponent(delivery.pickupAddress);
+      const deliveryAddress = encodeURIComponent(delivery.deliveryAddress);
+
+      // Create Google Maps URL with navigation from pickup to delivery
+      const googleMapsUrl = `https://www.google.com/maps/dir/${pickupAddress}/${deliveryAddress}`;
+
+      // Show success notification
+      showSuccessNotification(
+        "Delivery Accepted!",
+        "Opening navigation to pickup location...",
+      );
+
+      // Open Google Maps in new tab/window
+      window.open(googleMapsUrl, "_blank");
+
+      // Update the local state to move delivery from available to active
+      // This would normally be handled by the API response
+      setTimeout(() => {
+        console.log(`Delivery ${deliveryId} moved to active deliveries`);
+      }, 1000);
+    } else {
+      showErrorNotification("Error", "Delivery not found. Please try again.");
+    }
   };
 
   const handleDeclineDelivery = (deliveryId: string) => {
