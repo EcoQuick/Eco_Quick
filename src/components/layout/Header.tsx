@@ -44,6 +44,7 @@ const Header = () => {
 
   const getDashboardLink = () => {
     if (user?.type === "driver") return "/driver-dashboard";
+    if (user?.type === "admin") return "/admin";
     return "/customer-dashboard";
   };
 
