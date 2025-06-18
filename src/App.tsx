@@ -11,6 +11,7 @@ import CustomerDashboard from "./pages/CustomerDashboard";
 import DriverDashboard from "./pages/DriverDashboard";
 import DriverProfile from "./pages/DriverProfile";
 import AccountSettings from "./pages/AccountSettings";
+import AdminDashboard from "./pages/AdminDashboard";
 import Checkout from "./pages/Checkout";
 import Payment from "./pages/Payment";
 import OrderConfirmation from "./pages/OrderConfirmation";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/driver-dashboard" element={<DriverDashboard />} />
           <Route path="/driver-profile" element={<DriverProfile />} />
           <Route path="/settings" element={<AccountSettings />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
