@@ -363,6 +363,68 @@ CREATE TABLE revenue_analytics (
   created_at TIMESTAMP DEFAULT NOW(),
   UNIQUE(date)
 );
+
+-- Driver notifications table (New)
+CREATE TABLE driver_notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  driver_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  notification_type VARCHAR CHECK (notification_type IN (
+    'new_delivery_request', 'earnings_update', 'schedule_change',
+    'system_announcement', 'training_reminder', 'weather_alert',
+    'certification_expiry', 'payout_processed', 'rating_received'
+  )) NOT NULL,
+  title VARCHAR NOT NULL,
+  message TEXT NOT NULL,
+  priority VARCHAR CHECK (priority IN ('low', 'medium', 'high', 'urgent')) DEFAULT 'medium',
+  is_read BOOLEAN DEFAULT false,
+  order_id VARCHAR REFERENCES delivery_orders(id),
+  metadata JSONB, -- Additional notification data
+  expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Notification preferences table (New)
+CREATE TABLE notification_preferences (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_type VARCHAR CHECK (user_type IN ('customer', 'driver')) NOT NULL,
+
+  -- Driver notification preferences
+  new_delivery_requests BOOLEAN DEFAULT true,
+  earnings_updates BOOLEAN DEFAULT true,
+  schedule_changes BOOLEAN DEFAULT true,
+  system_announcements BOOLEAN DEFAULT true,
+  training_reminders BOOLEAN DEFAULT true,
+  weather_alerts BOOLEAN DEFAULT true,
+
+  -- Customer notification preferences
+  order_updates BOOLEAN DEFAULT true,
+  driver_updates BOOLEAN DEFAULT true,
+  promotions BOOLEAN DEFAULT false,
+
+  -- Communication channels
+  email_notifications BOOLEAN DEFAULT true,
+  sms_notifications BOOLEAN DEFAULT true,
+  push_notifications BOOLEAN DEFAULT true,
+  in_app_notifications BOOLEAN DEFAULT true,
+
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+
+-- Driver working hours table (New)
+CREATE TABLE driver_working_hours (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  driver_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  day_of_week INTEGER CHECK (day_of_week >= 0 AND day_of_week <= 6), -- 0 = Sunday, 6 = Saturday
+  is_working BOOLEAN DEFAULT false,
+  start_time TIME,
+  end_time TIME,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(driver_id, day_of_week)
+);
 ```
 
 #### B. Set Up Row Level Security (RLS)
@@ -581,6 +643,109 @@ BEGIN
     average_order_value = EXCLUDED.average_order_value;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Function to send driver notification
+CREATE OR REPLACE FUNCTION send_driver_notification(
+  driver_id_input UUID,
+  notification_type_input VARCHAR,
+  title_input VARCHAR,
+  message_input TEXT,
+  priority_input VARCHAR DEFAULT 'medium',
+  order_id_input VARCHAR DEFAULT NULL,
+  metadata_input JSONB DEFAULT NULL,
+  expires_hours INTEGER DEFAULT NULL
+) RETURNS UUID AS $$
+DECLARE
+  notification_id UUID;
+  user_preferences RECORD;
+  expires_timestamp TIMESTAMP;
+BEGIN
+  -- Check if driver has enabled this notification type
+  SELECT * INTO user_preferences
+  FROM notification_preferences
+  WHERE user_id = driver_id_input;
+
+  -- If no preferences found, create default preferences
+  IF NOT FOUND THEN
+    INSERT INTO notification_preferences (user_id, user_type)
+    VALUES (driver_id_input, 'driver');
+    user_preferences.new_delivery_requests := true;
+    user_preferences.earnings_updates := true;
+    user_preferences.schedule_changes := true;
+    user_preferences.system_announcements := true;
+    user_preferences.training_reminders := true;
+    user_preferences.weather_alerts := true;
+    user_preferences.in_app_notifications := true;
+  END IF;
+
+  -- Check if this notification type is enabled
+  IF (notification_type_input = 'new_delivery_request' AND NOT user_preferences.new_delivery_requests) OR
+     (notification_type_input = 'earnings_update' AND NOT user_preferences.earnings_updates) OR
+     (notification_type_input = 'schedule_change' AND NOT user_preferences.schedule_changes) OR
+     (notification_type_input = 'system_announcement' AND NOT user_preferences.system_announcements) OR
+     (notification_type_input = 'training_reminder' AND NOT user_preferences.training_reminders) OR
+     (notification_type_input = 'weather_alert' AND NOT user_preferences.weather_alerts) THEN
+    RETURN NULL; -- User has disabled this notification type
+  END IF;
+
+  -- Calculate expiration timestamp
+  IF expires_hours IS NOT NULL THEN
+    expires_timestamp := NOW() + (expires_hours || ' hours')::INTERVAL;
+  END IF;
+
+  -- Insert notification
+  INSERT INTO driver_notifications (
+    driver_id, notification_type, title, message, priority,
+    order_id, metadata, expires_at
+  ) VALUES (
+    driver_id_input, notification_type_input, title_input, message_input,
+    priority_input, order_id_input, metadata_input, expires_timestamp
+  ) RETURNING id INTO notification_id;
+
+  RETURN notification_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to mark notifications as read
+CREATE OR REPLACE FUNCTION mark_notifications_read(
+  driver_id_input UUID,
+  notification_ids UUID[] DEFAULT NULL
+) RETURNS INTEGER AS $$
+DECLARE
+  updated_count INTEGER;
+BEGIN
+  IF notification_ids IS NULL THEN
+    -- Mark all unread notifications as read for the driver
+    UPDATE driver_notifications
+    SET is_read = true
+    WHERE driver_id = driver_id_input AND is_read = false;
+    GET DIAGNOSTICS updated_count = ROW_COUNT;
+  ELSE
+    -- Mark specific notifications as read
+    UPDATE driver_notifications
+    SET is_read = true
+    WHERE driver_id = driver_id_input
+      AND id = ANY(notification_ids)
+      AND is_read = false;
+    GET DIAGNOSTICS updated_count = ROW_COUNT;
+  END IF;
+
+  RETURN updated_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to clean up expired notifications
+CREATE OR REPLACE FUNCTION cleanup_expired_notifications() RETURNS INTEGER AS $$
+DECLARE
+  deleted_count INTEGER;
+BEGIN
+  DELETE FROM driver_notifications
+  WHERE expires_at IS NOT NULL AND expires_at < NOW();
+
+  GET DIAGNOSTICS deleted_count = ROW_COUNT;
+  RETURN deleted_count;
+END;
+$$ LANGUAGE plpgsql;
 ```
 
 #### D. Initial Data Setup
@@ -626,6 +791,38 @@ INSERT INTO coupons (code, description, discount_type, discount_value, min_order
 -- Create admin user (update with actual details)
 INSERT INTO users (email, first_name, last_name, user_type)
 VALUES ('admin@ecoquick.com', 'Admin', 'User', 'admin');
+
+-- Insert default working hours for drivers (Monday to Sunday, 0=Sunday)
+-- This would typically be done when a driver signs up
+INSERT INTO driver_working_hours (driver_id, day_of_week, is_working, start_time, end_time)
+SELECT
+  (SELECT id FROM users WHERE email = 'sarah.thompson@ecoquick.com' LIMIT 1),
+  generate_series(0, 6) AS day_of_week,
+  CASE
+    WHEN generate_series(0, 6) = 0 THEN false  -- Sunday
+    WHEN generate_series(0, 6) = 6 THEN true   -- Saturday (partial)
+    ELSE true                                   -- Monday-Friday
+  END AS is_working,
+  CASE
+    WHEN generate_series(0, 6) = 0 THEN NULL   -- Sunday
+    WHEN generate_series(0, 6) = 6 THEN '10:00'::TIME  -- Saturday
+    ELSE '09:00'::TIME                          -- Monday-Friday
+  END AS start_time,
+  CASE
+    WHEN generate_series(0, 6) = 0 THEN NULL   -- Sunday
+    WHEN generate_series(0, 6) = 6 THEN '16:00'::TIME  -- Saturday
+    ELSE '18:00'::TIME                          -- Monday-Friday
+  END AS end_time;
+
+-- Sample driver notification preferences
+INSERT INTO notification_preferences (user_id, user_type, new_delivery_requests, earnings_updates, schedule_changes, system_announcements, training_reminders, weather_alerts)
+SELECT id, 'driver', true, true, true, true, true, true
+FROM users WHERE user_type = 'driver';
+
+-- Sample customer notification preferences
+INSERT INTO notification_preferences (user_id, user_type, order_updates, driver_updates, promotions)
+SELECT id, 'customer', true, true, false
+FROM users WHERE user_type = 'customer';
 ```
 
 ````
